@@ -1,0 +1,14 @@
+= Gateway Guide
+:doctype: book
+:imagesdir: ./images
+:xrefstyle: full
+:sectnums:
+
+[abstract]
+
+Instructions for installing and configuring OpenIG, a high-performance reverse proxy server with specialized session management and credential replay functionality.
+
+include::./preface.adoc[]
+include::./chap-start-here.adoc[]
+include::./chap-quickstart.adoc[]
+include::./chap-install.adoc[]

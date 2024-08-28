@@ -1,0 +1,70 @@
+[#chap-quickstart]
+== Getting Started
+
+In this chapter, you will learn to:
+
+* Quickly set up OpenIG on Jetty
+* Configure OpenIG to protect a sample application
+* Prepare OpenIG so that you can follow all subsequent tutorials in the documentation
+
+This chapter allows you to quickly see how OpenIG works, and provides hands-on experience with a few key features.
+For more general installation and configuration instructions, start with <<chap-install>>.
+
+=== Before You Begin
+Make sure you have a supported Java Development Kit installed.
+// TODO add link For details, see Section 2.1, "JDK Version" in the Release Notes.
+
+=== Install OpenIG
+
+You install OpenIG in the root context of a web application container.
+In this chapter, you use Jetty server as the web application container.
+
+====
+To perform initial installation, follow these steps:
+
+. Download and unzip a supported version of Jetty server.
++
+Supported versions are listed in Section 2.2, "Web Application Containers" in the Release Notes.
+. https://github.com/OpenIdentityPlatform/OpenIG/releases/[Download,window=_blank] the OpenIG .war file.
+. Deploy OpenIG in the root context.
++
+Copy the OpenIG .war file as `root.war` to the `/path/to/jetty/webapps/`:
++
+[source]
+----
+$ cp OpenIG-4.5.0.war /path/to/jetty/webapps/root.war
+----
++
+Jetty automatically deploys OpenIG in the root context on startup.
+
+. Start Jetty in the background:
++
+[source]
+----
+$ /path/to/jetty/bin/jetty.sh start`
+----
++
+Or start Jetty in the foreground:
++
+[source]
+----
+$ cd /path/to/jetty/
+$ java -jar start.jar
+----
+
+. Verify that you can see the OpenIG welcome page at http://localhost:8080.
++
+When you start OpenIG without a configuration, requests to OpenIG default to a welcome page with a link to the documentation.
+
+. Stop Jetty in the background:
++
+[source]
+----
+$ /path/to/jetty/bin/jetty.sh stop
+----
++
+Or stop Jetty in the foreground by entering Ctrl+C in the terminal where Jetty is running.
+====
+
+
+
