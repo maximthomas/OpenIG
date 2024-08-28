@@ -392,6 +392,7 @@
                 </goals>
                 <configuration>
                   <sourceDirectory>src/main/adoc/gateway-guide</sourceDirectory>
+                  <sourceDocumentName>index.adoc</sourceDocumentName>
                   <outputDirectory>target/docs</outputDirectory>
                   <backend>html5</backend>
                   <attributes>
@@ -415,6 +416,7 @@
                 </goals>
                 <configuration>
                   <sourceDirectory>src/main/adoc/gateway-guide</sourceDirectory>
+                  <sourceDocumentName>index.adoc</sourceDocumentName>
                   <outputDirectory>target/docs</outputDirectory>
                   <backend>pdf</backend>
                   <attributes>
