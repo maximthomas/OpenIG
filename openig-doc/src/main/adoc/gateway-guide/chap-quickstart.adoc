@@ -90,12 +90,12 @@ Now that OpenIG is installed, set up a sample application to protect.
 ====
 Follow these steps:
 
-. Download and run the minimal https://repo1.maven.org/maven2/org/openidentityplatform/openig/openig-doc/5.2.4/openig-doc-5.2.4-jar-with-dependencies.jar[HTTP server .jar] to use as the application to protect:
+. Download and run the minimal https://repo1.maven.org/maven2/org/openidentityplatform/openig/openig-doc/{releaseVersion}/openig-doc-{releaseVersion}-jar-with-dependencies.jar[HTTP server .jar] to use as the application to protect:
 
 + 
 [source]
 ----
-$ java -jar openig-doc-4.5.0-jar-with-dependencies.jar
+$ java -jar openig-doc-{releaseVersion}-jar-with-dependencies.jar
 Preparing to listen for HTTP on port 8081.
 Preparing to listen for HTTPS on port 8444.
 The server will use a self-signed certificate not known to browsers.
@@ -144,6 +144,7 @@ Log in with username `demo`, password `changeit`. You should see a page that inc
 
 ====
 
+[#quickstart-config]
 === Configure OpenIG
 
 Now that you have installed both OpenIG and a sample application to protect, it is time to configure OpenIG.
