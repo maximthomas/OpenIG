@@ -33,3 +33,7 @@ include::./chap-credentials-tutorial.adoc[]
 include::./chap-password-capture-replay-tutorial.adoc[]
 include::./chap-pep.adoc[]
 include::./chap-federation.adoc[]
+include::./chap-oauth2-rs.adoc[]
+include::./chap-oauth2-client.adoc[]
+include::./chap-ttf.adoc[]
+
