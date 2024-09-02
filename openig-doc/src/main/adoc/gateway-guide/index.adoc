@@ -36,4 +36,14 @@ include::./chap-federation.adoc[]
 include::./chap-oauth2-rs.adoc[]
 include::./chap-oauth2-client.adoc[]
 include::./chap-ttf.adoc[]
+include::./chap-uma.adoc[]
+include::./chap-routing.adoc[]
+include::./chap-gateway-templates.adoc[]
+include::./chap-extending.adoc[]
+include::./chap-auditing.adoc[]
+include::./chap-throttling.adoc[]
+include::./chap-logging.adoc[]
+include::./appendix.adoc[]
+
+
 
