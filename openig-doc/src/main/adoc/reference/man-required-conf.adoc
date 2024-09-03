@@ -1,0 +1,274 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyright [year] [name of copyright owner]".
+
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+[#required-conf]
+== Required Configuration
+
+You must specify at least the entry point for incoming requests, the OpenIG Servlet, and the heap objects that
+configure and initialize objects, with dependency injection.
+
+[#GatewayHttpApplication]
+=== GatewayHttpApplication
+Configure OpenIG
+
+==== Description
+
+The GatewayHttpApplication is the entry point for all incoming requests. It is responsible for initializing a heap of
+objects, described in <<heap-objects>>, and providing the main Handler that receives all the incoming requests.
+The configuration is loaded from a JSON-encoded configuration file, expected by default at `$HOME/.openig/config/config.json`.
+
+The GatewayHttpApplication creates the following objects by default:
+
+* An AuditDecorator that you can use to trigger notification for audit events. The default AuditDecorator is named audit.
+For details, see <<AuditDecorator>>.
+
+* A BaseUriDecorator that you can use to override the scheme, host, and port of the existing request URI.
+The default BaseUriDecorator is named baseURI. For details, see <<BaseUriDecorator>>.
+
+* A CaptureDecorator that you can use to capture requests and response messages. The default CaptureDecorator is named
+capture. For details, see <<CaptureDecorator>>.
+
+* A TimerDecorator that you can use to record time spent within Filters and Handlers. The default TimerDecorator is
+named timer. For details, see <<TimerDecorator>>.
+
+The GatewayHttpApplication declares default configurations in the heap for the following objects:
+
+* A ClientHandler named `ClientHandler` for communicating with protected applications. For details, see <<ClientHandler>>.
+
+* A ClientHandler named `ForgeRockClientHandler` for sending an Open Identity Platform Common Audit transaction ID when
+communicating with protected applications. The default object wraps the `ClientHandler`.
+
+The GatewayHttpApplication also looks for an object named Session in the heap. If it finds such an object,
+it uses that object as the default session producer. For example, to store session information in an HTTP cookie
+on the user-agent, you can define a JwtSession named Session in `config.json`. If you do that, however, stored session
+information must fit the constraints for storage in a JWT and in a cookie, as described in <<JwtSession>>.
+If no such object is found, `session` is based on the Servlet HttpSession that is handled by the container where OpenIG runs.
+
+==== Usage
+[source, json]
+----
+{
+  "handler": Handler reference or inline Handler declaration,
+  "heap": [ configuration object, ... ],
+  "logSink":  LogSink reference,
+  "temporaryStorage": TemporaryStorage reference
+}
+----
+
+==== Properties
+"handler": _Handler reference, required_::
+Dispatch all requests to this handler.
++
+Provide either the name of a Handler object defined in the heap, or an inline Handler configuration object.
++
+See also <<handlers-conf>>.
+
+"heap": _array of configuration objects, optional_::
+The heap object configuration, described in <<heap-objects>>.
++
+You can omit an empty array. If you only have one object in the heap, you can inline it as the handler value.
+
+"logSink": _LogSink reference, optional_::
+Send log messages to this LogSink.
++
+Provide either the name of a LogSink object defined in the heap, or an inline LogSink configuration object.
++
+Default: use the heap object named LogSink. Otherwise use an internally-created ConsoleLogSink object that is named
+LogSink and that uses default settings for a ConsoleLogSink object.
+
+"temporaryStorage": _TemporaryStorage reference, optional_::
+Cache content during processing based on this TemporaryStorage configuration.
++
+Provide either the name of a TemporaryStorage object defined in the heap, or an inline TemporaryStorage configuration object.
++
+Default: use the heap object named TemporaryStorage. Otherwise use an internally-created TemporaryStorage object that
+is named TemporaryStorage and that uses default settings for a TemporaryStorage object.
++
+See also <<TemporaryStorage>>.
+
+==== Javadoc
+org.forgerock.openig.http.GatewayHttpApplication
+//TODO fix link  org.forgerock.openig.http.GatewayHttpApplication
+
+[#heap-objects]
+=== Heap Objects
+Configure and initialize objects, with dependency injection
+
+==== Description
+A heap is a collection of associated objects, initialized from declarative configuration artifacts.
+All configurable objects in OpenIG are heap objects. Heap objects are created and initialized by associated heaplets,
+which retrieve any objects an object depends on from the heap. The heap configuration is included as an object in the
+GatewayHttpApplication configuration, as described in <<GatewayHttpApplication>>.
+
+==== Usage
+[source, json]
+----
+[
+    {
+        "name": string,
+        "type": string,
+        "config": {
+            object-specific configuration
+        }
+    },
+    ...
+]
+
+----
+
+==== Properties
+
+"name": _string, required except for inline objects_::
+The unique name to give the heap object in the heap. This name is used to resolve the heap object, for example,
+when another heap object names a heap object dependency.
+
+"type": _string, required_::
+The class name of the object to be created. To determine the type name, see the object's documentation in this reference.
+
+"config": _object, required_::
+The configuration that is specific to the heap object being created.
++
+If all the fields are optional and the configuration uses only default settings, you can omit the config field instead
+of including an empty config object as the field value.
+
+==== Automatically Created Objects
+
+OpenIG automatically creates some configuration objects that it needs for its own use. An automatically created object can be overridden by creating a heap object with the same name. Automatically created objects include the following:
+
+"ApiProtectionFilter"::
+The default filter used to protect administrative APIs on reserved routes. Reserved routes are described in
+<<reserved-routes>>.
++
+Default: a filter that allows access only from the loopback address.
++
+To override this filter, declare a different filter with the same name in the top-level heap found in `config.json`.
+
+"LogSink"::
+The default object to use for writing all audit and performance logging.
++
+Default: A ConsoleLogSink object named "LogSink" with the default configuration is added to the top-level heap.
++
+Routes can use this object without explicitly defining it. To override this object, create a LogSink heap object with the same name.
++
+See also <<ConsoleLogSink>>.
+
+"TemporaryStorage"::
+The default object to use for managing temporary buffers.
++
+Default: a TemporaryStorage object named "TemporaryStorage" with the default configuration is added to the top-level heap.
++
+Routes can use this object without explicitly defining it. To override this object, create a TemporaryStorage heap object with the same name.
++
+See also <<TemporaryStorage>>.
+
+==== Implicit Properties
+
+Every heap object has a set of implicit properties, which can be overridden on an object-by-object basis:
+
+"logSink": _string_::
+Specifies the heap object that should be used for audit and performance logging.
++
+Default: `LogSink`.
+
+"temporaryStorage": _string_::
+Specifies the heap object that should be used for temporary buffer storage.
++
+Default: `TemporaryStorage`.
+
+Configuration Settings — configure objects
+
+[#configuration]
+=== Configuration Settings
+Configure objects
+
+==== Description
+
+Filters, handlers, and other objects whose configuration settings are defined by strings, integers, or booleans,
+can alternatively be defined by expressions that match the expected type.
+
+Expressions can retrieve the values for configuration settings from system properties or environment variables.
+When OpenIG starts up or when a route is reloaded, the expressions are evaluated. If you change the value of a system
+property or environment variable and then restart OpenIG or reload the route, the configuration settings are updated
+with the new values.
+
+If a configuration setting is required and the expression returns `null`, an error occurs when OpenIG starts up or
+when the route is reloaded. If the configuration setting is optional, there is no error.
+
+In the following example, `"numberOfRequests"` is defined by an expression that recovers the system property
+`"requestsPerSecond"` and transforms it into an integer. Similarly, `"monitor"` is defined by an expression that recovers
+the environment variable `"ENABLE_MONITORING"` and transforms it into a boolean:
+
+[source, json]
+----
+{
+  "handler": {
+    "type": "Chain",
+    "config": {
+      "filters": [
+        {
+          "type": "ThrottlingFilter",
+          "config": {
+            "requestGroupingPolicy": "${request.headers['UserId'][0]}",
+            "rate": {
+              "numberOfRequests": "${integer(system['requestsPerSecond'])}",
+              "duration": "10 seconds"
+            }
+          }
+        }
+      ],
+      "handler": "ClientHandler"
+    }
+  },
+  "monitor" : "${boolean(env['ENABLE_MONITORING'])}",
+  "condition": "${matches(request.uri.path, '^/throttle-simple')}"
+}
+----
+If `"requestsPerSecond"=150` and `"ENABLE_MONITORING"=false`, after the expressions are evaluated OpenIG views
+the example route as follows:
+
+[source, json]
+----
+{
+  "handler": {
+    "type": "Chain",
+    "config": {
+      "filters": [
+        {
+          "type": "ThrottlingFilter",
+          "config": {
+            "requestGroupingPolicy": "${request.headers['UserId'][0]}",
+            "rate": {
+              "numberOfRequests": 150,
+              "duration": "10 seconds"
+            }
+          }
+        }
+      ],
+      "handler": "ClientHandler"
+    }
+  },
+  "monitor" : false,
+  "condition": "${matches(request.uri.path, '^/throttle-simple')}"
+}
+----
+
+For information about expressions, see <<Expressions>>.
+
+
+
+
+
