@@ -16,7 +16,7 @@
 ////
 
 [#chap-auditing]
-== Chapter 15. Auditing and Monitoring OpenIG
+== Auditing and Monitoring OpenIG
 
 Routes have a `monitor` boolean attribute that you can use to have OpenIG collect statistics for the route.
 The statistics are then exposed as a JSON resource that you can access over HTTP. In addition, OpenIG supports the
@@ -35,8 +35,8 @@ or the Syslog facility. In this chapter, you will learn to:
 === Monitoring a Route
 
 To monitor a route, you set `"monitor": true` in the top-level attributes on the route.
-The value of the attribute can be an expression that evaluates to a boolean, such as `"monitor": "${true}"`,
-or an object that indicates the percentile thresholds. By using an appropriate boolean expression, for example,
+The value of the attribute can be an expression that evaluates to a boolean, such as `"monitor": "$+{true}+"`,
+or an object that indicates the percentile thresholds.By using an appropriate boolean expression, for example,
 you can enable or disable monitoring with an environment variable or system property.
 For details, see Expressions(5) in the _Configuration Reference_ and Route(5) in the _Configuration Reference_.
 //TODO fix links Expressions(5) Route(5)
