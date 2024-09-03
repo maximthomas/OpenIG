@@ -18,7 +18,8 @@
 [#chap-start-here]
 == Understanding OpenIG
 
-.This chapter introduces OpenIG. In this chapter, you will learn the essentials of using OpenIG including:
+This chapter introduces OpenIG. In this chapter, you will learn the essentials of using OpenIG including:
+
 * What problems OpenIG solves and where it fits in your deployment
 * How OpenIG acts on HTTP requests and responses
 * How the configuration files for OpenIG are organized
@@ -28,16 +29,18 @@
 
 Most organizations have valuable existing services that are not easily integrated into newer architectures.
 These existing services cannot often be changed. Many client applications cannot communicate as they lack a gateway to bridge the gap.
-<<figure-missing-gateway>> illustrates one example of a missing gateway.
+The following image illustrates one example of a missing gateway.
 
 [#figure-missing-gateway]
-image::missing-gateway.png[title="Missing Gateway"]
+//.Missing Gateway
+image::missing-gateway.png
 
 OpenIG works as an HTTP gateway, also known as a reverse proxy. OpenIG is deployed on a network so it can intercept both
-client requests and server responses. <<figure-gateway-deployed>> illustrates a OpenIG deployment.
+client requests and server responses. The following image illustrates a OpenIG deployment.
 
 [#figure-gateway-deployed]
-image::gateway-deployed.png[title="Gateway Deployed"]
+//.Gateway Deployed
+image::gateway-deployed.png
 
 Clients interact with protected servers through OpenIG. OpenIG can be configured to add new
 capabilities to existing services without affecting current clients or servers.
@@ -69,6 +72,7 @@ identity of the principal, and any other state information associated with the r
 access state information throughout the duration of the HTTP session between the client and protected application,
 including when this involves interaction with additional services.
 
+[#the-configuration]
 === The Configuration
 
 The configuration for OpenIG is stored in flat files, which are mainly in JavaScript Object Notation (JSON) format
@@ -177,7 +181,7 @@ Use routing where OpenIG protects multiple services or multiple and different en
 Routing is also used when processing a request involves multiple steps, because the client must be redirected to
 authenticate with an identity provider before accessing the service.
 
-As illustrated in <<_the_configuration>> a router manages the routes in its file system directory,
+As illustrated in <<the-configuration>> a router manages the routes in its file system directory,
 periodically reloading changed routes unless it is configured to load them only at startup.
 
 A router does not explicitly specify any routes. Instead the router specifies a directory where route configuration f
@@ -224,14 +228,16 @@ to replace the client request, add a header to the request, or remove a header f
 +
 A chain can be placed anywhere in a configuration that a handler can be placed. Filters process the incoming request and pass it on to the next filter and the handler. After the handler produces a response, the filters process the outgoing response as it makes its way to the client. Note that the same filter can process both the incoming request and the outgoing response but most filters do one or the other.
 
-<<figure-chain>> shows the flow inside a chain, where a request filter transforms the request, a handler sends the request to a protected application, and then a response filter transforms the response. Notice how the flow traverses the filters in reverse order when the response comes back from the handler.
+The following image shows the flow inside a chain, where a request filter transforms the request, a handler sends the request to a protected application, and then a response filter transforms the response. Notice how the flow traverses the filters in reverse order when the response comes back from the handler.
 
-[#figure-chain]
-image::chain.png[title="Flow Inside a Chain"]
 
-The route configuration in <<example-chain>> demonstrates the flow through a chain to a protected application.
+//.Flow Inside a Chain
+//[#figure-chain]
+image::chain.png[]
 
-.Chain to a Protected Application
+The route configuration in the following example demonstrates the flow through a chain to a protected application.
+
+//.Chain to a Protected Application
 [#example-chain]
 ====
 [source, json]
@@ -291,11 +297,11 @@ context to the handler.
 * The second `HeaderFilter` adds a header added to the response.
 * The first `HeaderFilter` is configured to manage requests, not responses, so it simply passes the response back to OpenIG.
 
-<<example-chain>> explained how a chain processes a request and its context.
-<<example-chain-request-response>> illustrates the HTTP requests and responses captured as they flow through the chain.
+The example above explained how a chain processes a request and its context.
 
+The following example illustrates the HTTP requests and responses captured as they flow through the chain:
 
-.Requests and Responses in a Chain
+//.Requests and Responses in a Chain
 [#example-chain-request-response]
 ====
 [source, httprequest]
@@ -331,10 +337,9 @@ The JSON format does not specify a notation for comments. If OpenIG does not rec
 
 Use the following conventions when commenting to ensure your configuration files are easier to read:
 
-* Use comment fields to add text comments. <<example-comment-field>> illustrates a CaptureDecorator configuration that includes a text comment.
-
+* Use comment fields to add text comments. The following image illustrates a `CaptureDecorator` configuration that includes a text comment.
+//.Using a Comment Field
 +
-.Using a Comment Field
 [#example-comment-field]
 ====
 [source, json]
@@ -350,11 +355,11 @@ Use the following conventions when commenting to ensure your configuration files
 ----
 ====
 
-* Use an underscore (`_`) to comment a field temporarily. <<example-comment-underscore>> illustrates a
-CaptureDecorator that has "captureEntity": true commented out.
+* Use an underscore (`_`) to comment a field temporarily. The followin example illustrates a
+`CaptureDecorator` that has "captureEntity": true commented out.
 As a result, it uses the default setting (`"captureEntity": false`).
-
-.Using an Underscore
+//.Using an Underscore
++
 [#example-comment-underscore]
 ====
 [source, json]
@@ -377,26 +382,26 @@ Now that you understand the essential concepts, start using OpenIG with the help
 <<chap-quickstart>>:: This chapter shows you how to get OpenIG up and running quickly.
 
 <<chap-install>>:: This chapter covers more advanced installation procedures.
-// TODO
-Chapter 4, "Getting Login Credentials From Data Sources"
+
+<<chap-credentials-tutorial>>::
 This chapter shows you how to configure OpenIG to look up credentials in external sources, such as a file or a database.
 
-Chapter 5, "Getting Login Credentials From OpenAM"
+<<chap-password-capture-replay-tutorial>>::
 This chapter walks you through an OpenAM integration with OpenAM's password capture and replay feature.
 
-Chapter 7, "OpenIG As a SAML 2.0 Service Provider"
+<<chap-federation>>::
 This chapter shows how to configure OpenIG as a SAML 2.0 Identity Provider.
 
-Chapter 8, "OpenIG As an OAuth 2.0 Resource Server"
+<<chap-oauth2-rs>>::
 This chapter explains how OpenIG acts as an OAuth 2.0 Resource Server, and follows with a tutorial that shows you how to use OpenIG as a resource server.
 
-Chapter 9, "OpenIG As an OAuth 2.0 Client or OpenID Connect Relying Party"
+<<chap-oauth2-client>>::
 This chapter explains how OpenIG acts as an OAuth 2.0 client or OpenID Connect 1.0 relying party, and follows with a tutorial that shows you how to use OpenIG as an OpenID Connect 1.0 relying party.
 
-Chapter 12, "Configuring Routes"
+<<chap-routing>>::
 This chapter shows how to configure OpenIG to allow dynamic configuration changes and route to multiple applications.
 
-Chapter 13, "Configuration Templates"
+<<chap-gateway-templates>>::
 This chapter provides sample OpenIG configuration files for common use cases.
 
 

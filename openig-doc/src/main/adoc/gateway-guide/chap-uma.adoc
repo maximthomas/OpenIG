@@ -33,11 +33,11 @@ This section covers the role OpenIG plays as UMA resource server.
 ==== About UMA
 https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.html[User-Managed Access (UMA) Profile of OAuth 2.0]
 defines a workflow that allows resource owners to share their protected
-resources with requesting parties. Figure 11.1, "UMA Workflow" illustrates the relationships where OpenIG protects the
+resources with requesting parties. The figure below illustrates the relationships where OpenIG protects the
 resource server.
 
 [#figure-uma-workflow-overview]
-image::uma-workflow-overview.png[title="UMA Workflow"]
+image::uma-workflow-overview.png[]
 
 The actions that form the UMA workflow are as follows:
 
@@ -544,7 +544,7 @@ Follow these steps to run the demonstration:
 . Browse to http://api.example.com:8081/uma/, and check that the configuration displayed in the page matches your settings.
 +
 The settings match if you are using the defaults described in this chapter. If not, unpack UMA sample client
-files from the minimal HTTP server described in <<#quickstart-sample-app>> to a web server document __cpLocation for your web server:
+files from the minimal HTTP server described in <<quickstart-sample-app>> to a web server document __cpLocation for your web server:
 +
 [source, console]
 ----

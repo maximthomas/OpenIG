@@ -17,7 +17,6 @@
 
 [#chap-ttf]
 == Transforming OpenID Connect ID Tokens Into SAML Assertions
-:example-caption: Procedure
 
 OpenIG provides a token transformation filter to transform OpenID Connect ID tokens (id_tokens) issued by OpenAM into
 SAML 2.0 assertions. The implementation uses the REST Security Token Service (STS) APIs, where the subject confirmation

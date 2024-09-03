@@ -602,7 +602,7 @@ build a login request. Although the script sets the scheme to HTTPS, the `Static
 This makes it easier to try the script without additional steps to set up HTTPS.
 
 To try the configuration, browse to a URL where a query string parameter specifies a valid email address,
-such as http://openig.example.com:8080/db?mail=george@example.com.
+such as http://openig.example.com:8080/db?mail=\george@example.com.
 
 If the lookup and authentication are successful, you see the profile page of the sample application.
 

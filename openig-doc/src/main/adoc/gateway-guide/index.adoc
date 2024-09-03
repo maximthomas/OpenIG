@@ -18,8 +18,17 @@
 = Gateway Guide
 :doctype: book
 :imagesdir: ./images
-:xrefstyle: full
-:sectnums:
+//:xrefstyle: full
+//:sectnums:
+:copyright: Copyright 2017 ForgeRock AS.
+:copyright: Portions Copyright 2024 3A Systems LLC.
+:authors: Paul Bryan, Mark Craig, Jamie Nelson, Guillaume Sauthier, Joanne Henry
+:toc:
+:version-label: {releaseVersion}
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
 
 [abstract]
 

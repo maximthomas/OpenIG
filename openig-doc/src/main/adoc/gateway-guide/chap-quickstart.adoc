@@ -83,6 +83,7 @@ $ /path/to/jetty/bin/jetty.sh stop
 Or stop Jetty in the foreground by entering Ctrl+C in the terminal where Jetty is running.
 ====
 
+[#quickstart-sample-app]
 === Install an Application to Protect
 
 Now that OpenIG is installed, set up a sample application to protect.
@@ -215,7 +216,7 @@ If you adapt this base configuration for production use, make sure to adjust the
 ----
 
 +
-[source, json]
+[source, console]
 ----
 $ mkdir $HOME/.openig/config/routes
 $ vi $HOME/.openig/config/routes/99-default.json
@@ -343,10 +344,11 @@ After you change the configuration, OpenIG continues to capture request and resp
 
 Using the route configuration in `01-static.json`, OpenIG replaces your browser's original HTTP GET request with an HTTP POST login request containing credentials to authenticate. As a result, instead of the home page with a login form, OpenIG logs you in directly, and the application responds with the page you see after logging in. OpenIG then returns this response to your browser.
 
-<<figure-hard-coded-login>> shows the steps
+The following diagram shows the steps
 
+//.Log in With Hard-Coded Credentials
 [#figure-hard-coded-login]
-image::hard-coded-login.png[title="Log in With Hard-Coded Credentials"]
+image::hard-coded-login.png
 
 . The browser host makes a DNS request for the IP address of the HTTP server host, app.example.com.
 . DNS responds with the address for OpenIG.
