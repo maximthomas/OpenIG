@@ -15,24 +15,5 @@
   Portions Copyright 2024 3A Systems LLC.
 ////
 
-= Configuration Reference
-
-include::../commons/settings.adoc[]
-
-:copyright: Copyright 2017 ForgeRock AS.
-:copyright: Portions Copyright 2024 3A Systems LLC.
-:authors: Paul Bryan, Mark Craig, Jamie Nelson, Joanne Henry
-
-
-[abstract]
-
-Reference documentation for OpenIG. OpenIG provides a high-performance reverse proxy server with specialized session
-management and credential replay functionality.
-
-include::./preface.adoc[]
-include::./man-required-conf.adoc[]
-include::./man-handlers.adoc[]
-include::./man-filters.adoc[]
-include::./man-decorators.adoc[]
-
-
+[#decorators-conf]
+== Decorators

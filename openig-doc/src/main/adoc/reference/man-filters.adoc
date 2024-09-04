@@ -1376,6 +1376,885 @@ PasswordReplayFilter class.
 org.forgerock.openig.filter.PasswordReplayFilterHeaplet
 //TODO fix javadoc
 
+=== PolicyEnforcementFilter
+Enforce policy decisions from OpenAM
+
+==== Description
+This filter requests policy decisions from OpenAM, which allows or denies the request based on the request context,
+the request URI, and the OpenAM policies.
+
+* If the request is allowed, processing continues.
+* If the request is denied, OpenIG returns 403 Forbidden.
+* If an error occurs during the process, OpenIG returns 500 Internal Server Error.
+
+This filter allows you to specify the subject by SSO token, JWT, or JWT claims.
+
+This filter can add contextual attributes (accessible through `$+{attributes}+`), and some elements returned by the
+policy decision, such as attributes and advices.
+
+[NOTE]
+====
+In the OpenAM policy, remember to configure the `Resources` parameter with the URI of the protected application.
+
+The request URI from OpenIG must match the `Resources` parameter defined in the OpenAM policy.
+If the URI of the incoming request is changed before it enters the policy filter (for example, by rebasing or scripting),
+remember to change the Resources parameter in OpenAM policy accordingly.
+====
+
+==== Usage
+[source, js]
+----
+{
+    "name": string,
+    "type": "PolicyEnforcementFilter",
+    "config": {
+        "openamUrl": URI expression,
+        "pepUsername": expression,
+        "pepPassword": expression,
+        "pepRealm": string,
+        "ssoTokenSubject": expression,
+        "jwtSubject": expression,
+        "claimsSubject": map or expression,
+        "amHandler": Handler reference,
+        "realm": string,
+        "ssoTokenHeader": string,
+        "application": string,
+        "cacheMaxExpiration": duration string,
+        "target": lvalue-expression,
+        "environment": map or expression,
+        "executor": executor
+    }
+}
+----
+
+==== Properties
+"openamUrl": _URI expression, required_::
+The URL to an OpenAM service, such as `\https://openam.example.com:8443/openam/`.
++
+See also <<Expressions>>.
+
+"pepUsername": _expression, required_::
+The OpenAM username of the user with permission to request policy decisions.
++
+See also <<Expressions>>.
+
+"pepPassword": _expression, required_::
+The OpenAM password of the user with permission to request policy decisions.
++
+See also <<Expressions>>.
+
+"pepRealm": _string, optional_::
+The realm of the user with permission to request policy decisions.
++
+Default: The value used by `realm`.
+
+"ssoTokenSubject": _expression, required if neither of the following properties are present: "jwtSubject", "claimsSubject"_::
+An expression evaluating to the OpenAM SSO token ID string for the subject making the request to the protected resource.
++
+See also <<Expressions>>.
+
+"jwtSubject": _expression, required if neither of the following properties are present: "ssoTokenSubject", "claimsSubject"_::
+An expression evaluating to the JWT string for the subject making the request to the protected resource.
++
+To use the raw id_token (base64, not decoded) returned by the OpenID Connect Provider during authentication, place an
+_OAuth2ClientFilter_ filter before the PEP filter, and then use _$+{attributes.openid.id_token}+_ as the expression value.
+
+See also <<OAuth2ClientFilter>> and <<Expressions>>.
+
+"claimsSubject": map or expression, required if neither of the following properties are present: "jwtSubject", "ssoTokenSubject"::
+A representation of JWT claims for the subject. The subject must be specified, but the JWT claims can contain other
+information such as the token issuer, expiration, and so on.
++
+--
+If this property is a map, the structure must have the format `Map<String, Object>`. The value is evaluated as an expression.
+[source, json]
+----
+"claimsSubject": {
+  "sub": "${attributes.subject_identifier}",
+  "iss": "openam.example.com"
+}
+----
+If this property is an expression, its evaluation must give an object of type `Map<String, Object>`.
+[source, json]
+----
+"claimsSubject": "${attributes.openid.id_token_claims}"
+----
+See also <<Expressions>>(5).
+--
+
+"amHandler": _Handler reference, optional_::
+The handler to use when requesting policy decisions from OpenAM.
++
+In production, use a ClientHandler that is capable of making an HTTPS connection to OpenAM.
++
+Default: OpenIG uses the `ForgeRockClientHandler`.
++
+See also <<handlers-conf>>.
+
+"realm": _string, optional_::
+The OpenAM realm to use when requesting policy decisions.
++
+Default: `/` (Top Level Realm)
+
+"ssoTokenHeader": _string, optional_::
+The name of the HTTP header to use when supplying the SSO token ID for the user making a policy decision request.
++
+Default: `iPlanetDirectoryPro`
+
+"application": _string, optional_::
+The OpenAM application to use when requesting policy decisions.
++
+Default: OpenIG does not specify an application when making a policy decision request.
+As a result, the application is `iPlanetAMWebAgentService`, which is the default for OpenAM.
+
+"cacheMaxExpiration": _duration string, optional_::
+Maximum duration for which to cache policy decision responses. If the time-to-live value in the policy decision
+response is shorter, then OpenIG expires the decision according to the shorter lifetime.
++
+--
+This setting prevents OpenIG from having to issue a new request for every policy decision,
+including even repeated requests by the same subject for the same resource.
+[NOTE]
+====
+Cached policy decisions remain in the OpenIG cache even after a user logs out of OpenAM and the OpenAM session becomes invalid.
+====
+A duration is a lapse of time expressed in English, such as `23 hours 59 minutes and 59 seconds`.
+//TODO fix javadoc duration org/forgerock/openig/util/Duration.html
+Durations are not case sensitive.
+
+Negative durations are not supported.
+
+The following units can be used in durations:
+
+* `indefinite`, `infinity`, `undefined`, `unlimited`: unlimited duration
+* `zero`, `disabled`: zero-length duration
+* `days`, `day`, `d`: days
+* `hours`, `hour`, `h`: hours
+* `minutes`, `minute`, `min`, `m`: minutes
+* `seconds`, `second`, `sec`, `s`: seconds
+* `milliseconds`, `millisecond`, `millisec`, `millis`, `milli`, `ms`: milliseconds
+* `microseconds`, `microsecond`, `microsec`, `micros`, `micro`, `us`: microseconds
+* `nanoseconds`, `nanosecond`, `nanosec`, `nanos`, `nano`, `ns`: nanoseconds
+
+Default: 1 minute
+
+--
+
+"target": _lvalue-expression, optional_::
+A map in the attributes context where the "attributes" and "advices" map fields from the policy decision are saved.
++
+Example: _$+{attributes.policy.attributes}+_ and _$+{attributes.policy.advices}+_
++
+Default: _$+{attributes.policy}+_
+
+"environment": _map or expression, optional_::
+Environment conditions can be defined in an OpenAM policy to set the circumstances under which the policy applies.
+For example, environment conditions can specify that the policy applies only during working hours or only when
+accessing from a specific IP address.
++
+If this property is a map, the structure must have the format `Map<String, List<Object>>`.
++
+[source, json]
+----
+"environment": {
+  "IP": [ "${contexts.client.remoteAddress}" ]
+}
+----
++
+If this property is an expression, its evaluation must give an object of type `Map<String, List<Object>>`.
++
+[source, json]
+----
+"environment": "${attributes.my_environment}"
+----
+
+"executor": _executor, optional_::
+An executor service to schedule the execution of tasks, such as the eviction of entries in the policy decision cache.
++
+Default: `ScheduledExecutorService`
++
+See also <<ScheduledExecutorService>>.
+
+==== Example
+The following example requests a policy decision from OpenAM before allowing a request to continue.
+The `policyAdmin` user is an OpenAM subject with permission to request policy decisions. The user making the request
+to the protected resource is identified by an SSO token ID string. The realm defaults to OpenAM's top-level realm:
+[source, json]
+----
+{
+    "handler": {
+        "type": "Chain",
+        "config": {
+            "filters": [
+                {
+                    "type": "PolicyEnforcementFilter",
+                    "config": {
+                        "openamUrl": "https://openam.example.com:8443/openam/",
+                        "pepUsername": "policyAdmin",
+                        "pepPassword": "${env['POLICY_ADMIN_PWD']}",
+                        "ssoTokenSubject": "${attributes.SSOCurrentUser}",
+                        "claimsSubject": "${attributes.openid.id_token_claims}",
+                        "target": "${attributes.currentPolicy}",
+                        "environment": {
+                            "IP": [ "${contexts.client.remoteAddress}" ]
+                         }
+                    }
+                }
+            ],
+            "handler": "ClientHandler"
+        }
+    }
+}
+----
+
+==== Javadoc
+org.forgerock.openig.openam.PolicyEnforcementFilter
+//TODO fix javadoc
+
+==== See Also
+Requesting Policy Decisions in OpenAM
+//TODO fix link to openam dev-guide #rest-api-authz-policy-decisions
+
+=== ScriptableFilter
+Process requests and responses by using a script
+
+==== Description
+
+Processes requests and responses by using a script.
+
+The script must return either a Promise<Response, NeverThrowsException> or a Response.
+//TODO fix javadoc links org/forgerock/util/promise/Promise.html org/forgerock/http/protocol/Response.html
+
+[IMPORTANT]
+====
+When you are writing scripts or Java extensions, never use a Promise blocking method, such as `get()`, `getOrThrow()`,
+or `getOrThrowUninterruptibly()`, to obtain the response.
+
+A promise represents the result of an asynchronous operation. Therefore, using a blocking method to wait for the
+result can cause deadlocks and/or race issues.
+====
+
+==== Classes
+The following classes are imported automatically for Groovy scripts:
+
+* `org.forgerock.http.Client`
+* `org.forgerock.http.Filter`
+* `org.forgerock.http.Handler`
+* `org.forgerock.http.filter.throttling.ThrottlingRate`
+* `org.forgerock.http.util.Uris`
+* `org.forgerock.util.AsyncFunction`
+* `org.forgerock.util.Function`
+* `org.forgerock.util.promise.NeverThrowsException`
+* `org.forgerock.util.promise.Promise`
+* `org.forgerock.services.context.Context`
+* `org.forgerock.http.protocol.*`
+
+==== Objects
+The script has access to the following global objects:
+
+Any parameters passed as args::
+You can use the configuration to pass parameters to the script by specifying an args object.
++
+Take care when naming keys in the args object. Attempts to reuse the name of another global object cause the script
+to fail and OpenIG to return a response with HTTP status code 500 Internal Server Error.
+
+attributes::
+The attributes object provides access to a context map of arbitrary attributes, which is a mechanism for transferring
+transient state between components when processing a single request.
+//TODO fix javadoc attributes org/forgerock/services/context/AttributesContext.html
++
+Use `session` for maintaining state between successive requests from the same logical client.
+
+context::
+The processing context.
++
+This context is the leaf of a chain of contexts. It provides access to other Context types, such as SessionContext,
+AttributesContext, and ClientContext, through the `context.asContext(ContextClass.class)` method.
+
+request::
+The HTTP request.
+//TODO fix javadoc org/forgerock/http/protocol/Request.html
+
+globals::
+This object is a https://docs.groovy-lang.org/latest/html/groovy-jdk/java/util/Map.html[Map]
+that holds variables that persist across successive invocations.
+
+http::
+An embedded client for making outbound HTTP requests, which is an org.forgerock.http.Client.
+//TODO fix javadoc org/forgerock/http/Client.html
++
+If a `"clientHandler"` is set in the configuration, then that Handler is used. Otherwise,
+the default ClientHandler configuration is used.
++
+For details, see <<handlers-conf>>.
+
+ldap::
+The ldap object provides an embedded LDAP client.
+//TODO fix javadoc org/forgerock/openig/ldap/LdapClient.html
++
+Use this client to perform outbound LDAP requests, such as LDAP authentication.
+
+logger::
+The logger object provides access to the server log sink.
+//TODO fix javadoc org/forgerock/openig/log/Logger.html
+
+next::
+The next object refers to the next handler in the filter chain.
+//TODO fix javadoc org/forgerock/http/Handler.html
+
+session::
+The session object provides access to the session context, which is a mechanism for maintaining state when processing
+a successive requests from the same logical client or end-user.
+//TODO fix javadoc org/forgerock/http/session/SessionContext.html
++
+Use `attributes` for transferring transient state between components when processing a single request.
+
+==== Usage
+[source, js]
+----
+{
+    "name": string,
+    "type": "ScriptableFilter",
+    "config": {
+        "type": string,
+        "file": expression, // Use either "file"
+        "source": string,   // or "source", but not both.
+        "args": object,
+        "clientHandler": Handler reference
+    }
+}
+----
+
+==== Properties
+"type": _string, required_::
+The Internet media type (formerly MIME type) of the script, `"application/x-groovy"` for Groovy
+
+"file": _expression_::
+Path to the file containing the script; mutually exclusive with "source"
++
+Relative paths in the file field are relative to the base location for scripts. The base location depends on the
+configuration. For details, see Section 3.3, "Installing OpenIG" in the _Gateway Guide_.
+//TODO fix link Section 3.3, "Installing OpenIG"
++
+The base location for Groovy scripts is on the classpath when the scripts are executed. If therefore some Groovy
+scripts are not in the default package, but instead have their own package names, they belong in the directory
+corresponding to their package name. For example, a script in package `com.example.groovy` belongs under
+`openig-base/scripts/groovy/com/example/groovy/`.
+
+"source": _string_::
+The script as a string; mutually exclusive with `"file"`
+
+"args": _object, optional_::
+Parameters passed from the configuration to the script.
++
+--
+The configuration object is a map whose values can be scalars, arrays, objects and so forth, as in the following example:
+[source, json]
+----
+{
+    "args": {
+        "title": "Coffee time",
+        "status": 418,
+        "reason": [
+            "Not Acceptable",
+            "I'm a teapot",
+            "Acceptable"
+        ],
+        "names": {
+            "1": "koffie",
+            "2": "kafe",
+            "3": "cafe",
+            "4": "kafo"
+        }
+    }
+}
+----
+
+The script can then access the args parameters in the same way as other global objects. The following example sets
+the response status to `I'm a teapot`:
+[source, groovy]
+----
+response.status = Status.valueOf(418, reason[1])
+----
+
+For details regarding this status code see RFC 7168, Section 2.3.3
+https://datatracker.ietf.org/doc/html/rfc7168#section-2.3.3[418 I'm a Teapot].
+
+Args parameters can reference objects defined in the heap using expressions. For example, the following excerpt
+shows the heap that defines `SampleFilter`:
+[source, json]
+----
+{
+    "heap": [
+        {
+            "name": "SampleFilter",
+            "type": "SampleFilter",
+            "config": {
+                "name": "X-Greeting",
+                "value": "Hello world"
+            }
+        }
+    ]
+}
+----
+[NOTE]
+====
+SampleFilter is a customized filter implemented as an extension of OpenIG. For information about sample filter,
+see Section 14.6.2, "Implementing a Customized Sample Filter" in the _Gateway Guide_.
+//TODO fix link Section 14.6.2, "Implementing a Customized Sample Filter"
+====
+
+To pass `SampleFilter` to the script, the following example uses an expression in the args parameters:
+
+[source, json]
+----
+{
+    "args": {
+        "filter": "${heap['SampleFilter']}"
+    }
+}
+----
+The script can then reference `SampleFilter` as `filter`.
+
+For details about the heap, see <<heap-objects>>.
+--
+
+"clientHandler", _ClientHandler reference, optional_::
+A Handler for making outbound HTTP requests.
++
+Default: Use the default ClientHandler.
++
+For details, see <<handlers-conf>>.
+
+==== Javadoc
+org.forgerock.openig.filter.ScriptableFilter
+//TODO fix javadoc link
+
+=== SqlAttributesFilter
+Execute SQL query
+
+==== Description
+Executes a SQL query through a prepared statement and exposes its first result. Parameters in the prepared
+statement are derived from expressions. The query result is exposed in an object whose location is specified by
+the `target` expression. If the query yields no result, then the resulting object is empty.
+
+The execution of the query is performed lazily; it does not occur until the first attempt to access a value in the target.
+This defers the overhead of connection pool, network and database query processing until a value is first required.
+This also means that the parameters expressions is not evaluated until the object is first accessed.
+
+==== Usage
+[source, js]
+----
+{
+     "name": string,
+     "type": "SqlAttributesFilter",
+     "config": {
+         "dataSource": string,
+         "preparedStatement": string,
+         "parameters": [ expression, ... ],
+         "target": lvalue-expression
+     }
+}
+----
+
+==== Properties
+
+"dataSource": _string, required_::
+The JNDI name of the factory for connections to the physical data source.
+
+"preparedStatement": _string, required_::
+The parameterized SQL query to execute, with `?` parameter placeholders.
+
+"parameters": _array of expressions, optional_::
+The parameters to evaluate and include in the execution of the prepared statement.
++
+See also <<Expressions>>.
+
+"target": _lvalue-expression, required_::
+Expression that yields the target object that will contain the query results.
++
+See also <<Expressions>>.
+
+==== Example
+Using the user's session ID from a cookie, query the database to find the user logged in and set the profile attributes
+in the attributes context:
+[source, json]
+----
+{
+        "name": "SqlAttributesFilter",
+        "type": "SqlAttributesFilter",
+        "config": {
+              "target": "${attributes.sql}",
+              "dataSource": "java:comp/env/jdbc/mysql",
+              "preparedStatement": "SELECT f.value AS 'first', l.value AS
+                'last', u.mail AS 'email', GROUP_CONCAT(CAST(r.rid AS CHAR)) AS
+                'roles'
+                FROM sessions s
+                INNER JOIN users u
+                ON ( u.uid = s.uid AND u.status = 1 )
+                LEFT OUTER JOIN profile_values f
+                ON ( f.uid = u.uid AND f.fid = 1 )
+                LEFT OUTER JOIN profile_values l
+                ON ( l.uid = u.uid AND l.fid = 2 )
+                LEFT OUTER JOIN users_roles r
+                ON ( r.uid = u.uid )
+                WHERE (s.sid = ? AND s.uid <> 0) GROUP BY s.sid;",
+              "parameters": [ "${request.cookies
+                [keyMatch(request.cookies,'JSESSION1234')]
+                [0].value}" ]
+         }
+ }
+----
+
+Lines are folded for readability in this example. In your JSON, keep the values for "preparedStatement" and "parameters" on one line.
+
+==== Javadoc
+org.forgerock.openig.filter.SqlAttributesFilter
+//TODO fix javadoc
+
+=== StaticRequestFilter
+Create new request
+
+==== Description
+Creates a new request, replacing any existing request. The request can include an entity specified in the `entity` parameter.
+Alternatively, the request can include a form, specified in the `form` parameter, which is included in an entity encoded
+in `application/x-www-form-urlencoded` format if request method is `POST`, or otherwise as (additional) query parameters in
+the URI. The `form` and `entity` parameters cannot be used together when the `method` is set to `POST`.
+
+==== Usage
+[source, js]
+----
+{
+     "name": string,
+     "type": "StaticRequestFilter",
+     "config": {
+         "method": string,
+         "uri": string,
+         "version": string,
+         "headers": {
+             name: [ expression, ... ], ...
+         },
+         "form": {
+             param: [ expression, ... ], ...
+         },
+         "entity": expression
+     }
+}
+----
+
+==== Properties
+"method": _string, required_::
+The HTTP method to be performed on the resource (for example, `"GET"`).
+
+"uri": _string, required_::
+The fully-qualified URI of the resource to access (for example, `"\http://www.example.com/resource.txt"`).
+
+"version": _string, optional_::
+Protocol version. Default: `"HTTP/1.1"`.
+
+"headers": _object, optional_::
+Header fields to set in the request.
++
+The `name` specifies the header name. Its value is an array of expressions to evaluate as header values.
+
+"form": _object, optional_::
+A form to include in the request.
++
+The _param_ specifies the form parameter name. Its value is an array of expressions to evaluate as form field values.
++
+This setting is mutually exclusive with the `entity` setting when the `method` is set to `POST`.
+
+"entity": _expression, optional_::
+The entity body to include in the request.
++
+This setting is mutually exclusive with the `form` setting when the `method` is set to `POST`.
++
+See also <<Expressions>>.
+
+==== Example
+[source, json]
+----
+{
+     "name": "LoginRequestFilter",
+     "type": "StaticRequestFilter",
+     "config": {
+         "method": "POST",
+         "uri": "http://10.10.0.2:8080/wp-login.php",
+         "form": {
+             "log": [ "george" ],
+             "pwd": [ "bosco" ],
+             "rememberme": [ "forever" ],
+             "redirect_to": [ "http://portal.example.com:8080/wp-admin/" ],
+             "testcookie": [ "1" ]
+         }
+     }
+}
+----
+
+==== Javadoc
+org.forgerock.openig.filter.StaticRequestFilter
+//TODO fix javadoc link
+
+
+=== SwitchFilter
+Divert requests to another handler
+
+==== Description
+Conditionally diverts requests to another handler. If a `condition` evaluates to `true`, then the request is dispatched
+to the associated `handler` with no further processing by the switch filter.
+
+==== Usage
+[source, js]
+----
+{
+    "name": string,
+    "type": "SwitchFilter",
+    "config": {
+        "onRequest": [
+            {
+                "condition": expression,
+                "handler": Handler reference,
+            },
+            ...
+        ],
+        "onResponse": [
+            {
+                "condition": expression,
+                "handler": Handler reference,
+            },
+            ...
+        ]
+    }
+}
+----
+
+==== Properties
+"onRequest": _array of objects, optional_::
+Conditions to test (and handler to dispatch to, if `true`) before the request is handled.
+
+"onResponse": _array of objects, optional_::
+Conditions to test (and handler to dispatch to, if `true`) after the response is handled.
+
+"condition": _expression, optional_::
+Condition to evaluate to determine if the request or response should be dispatched to the handler.
++
+Default: unconditional dispatch to the handler.
++
+See also <<Expressions>>.
+
+"handler": _Handler reference, required_::
+Dispatch to this handler if the condition yields `true`.
++
+Provide either the name of a Handler object defined in the heap, or an inline Handler configuration object.
++
+See also <<handlers-conf>>.
+
+==== Example
+This example intercepts the response if it is equal to 200 and executes the LoginRequestHandler. This filter might be
+used in a login flow where the request for the login page must go through to the target, but the response should be
+intercepted in order to send the login form to the application. This is typical for scenarios where there is a hidden
+value or cookie returned in the login page, which must be sent in the login form:
+
+[source, json]
+----
+{
+    "name": "SwitchFilter",
+    "type": "SwitchFilter",
+    "config": {
+        "onResponse": [
+            {
+                "condition": "${response.status.code == 200}",
+                "handler": "LoginRequestHandler"
+            }
+        ]
+    }
+}
+----
+
+==== Javadoc
+org.forgerock.openig.filter.SwitchFilter
+//TODO fix javadoc link
+
+=== TokenTransformationFilter
+Transform a token issued by OpenAM to another type
+
+==== Description
+This filter transforms a token issued by OpenAM to another token type.
+
+The current implementation uses the REST Security Token Service (STS) APIs. It supports transforming an OpenID Connect
+ID Token (`id_token`) into a SAML 2.0 assertion where the subject confirmation method is Bearer, as described in
+https://docs.oasis-open.org/security/saml/v2.0/saml-profiles-2.0-os.pdf[Profiles for the OASIS Security Assertion Markup Language (SAML) V2.0].
+
+The configuration for this filter references a REST STS instance that must be set up in OpenAM before this filter can be used.
+The REST STS instance exposes a pre-configured transformation under a specific REST endpoint. See the OpenAM documentation
+for details about setting up a REST STS instance.
+
+Any errors that occur during the token transformation cause a error response to be returned to the client and an error
+message to be logged for the OpenIG administrator.
+
+==== Usage
+[source, js]
+----
+{
+    "name": "string",
+    "type": "TokenTransformationFilter",
+    "config": {
+        "openamUri": URL string,
+        "realm": OpenAM realm name string,
+        "username": "${attributes.username}",
+        "password": "${attributes.password}",
+        "idToken": "${attributes.id_token}",
+        "target": "${attributes.saml_assertions}",
+        "instance": "oidc-to-saml",
+        "amHandler": Handler reference,
+        "ssoTokenHeader": string
+    }
+}
+----
+
+==== Properties
+
+"openamUri": _URL string, required_::
+The base URL to an OpenAM service, such as `\https://openam.example.com:8443/openam/`.
++
+Authentication and REST STS requests are made to this service.
+
+"realm": _string, optional_::
+The OpenAM realm containing both the OpenAM user who can make the REST STS request and whose credentials are the
+username and password, and the STS instance described by the instance field.
++
+Default: `/` (Top Level Realm)
+
+"username": _expression, required_::
+The username for authenticating OpenIG as an OpenAM REST STS client.
++
+See also <<Expressions>>.
+
+"password": _expression, required_::
+The password for authenticating OpenIG as an OpenAM REST STS client.
++
+See also <<Expressions>>.
+
+"idToken": _expression, required_::
+An expression evaluating to OpenID Connect ID token.
++
+The expected value is a string that is the JWT encoded `id_token`.
++
+See also <<Expressions>>.
+
+"target": _expression, required_::
+An expression evaluating to the location where the SAML 2.0 assertion is injected following successful transformation.
++
+The value of the SAML 2.0 assertion is a string.
++
+See also <<Expressions>>.
+
+"instance": _expression, required_::
+An expression evaluating to name of the REST STS instance.
++
+This expression is evaluated when the route is initialized, so the expression cannot refer to `request` or `contexts`.
++
+See also <<Expressions>>.
+
+"amHandler": _Handler reference, optional_::
+The handler to use for authentication and STS requests to OpenAM.
++
+In production, use a ClientHandler that is capable of making an HTTPS connection to OpenAM.
++
+Default: OpenIG uses the `ForgeRockClientHandler`.
++
+See also <<handlers-conf>>.
+
+"ssoTokenHeader": _string, optional_::
+The name of the HTTP header to use when supplying the SSO token ID for the REST STS client subject.
++
+Default: `iPlanetDirectoryPro`
+
+==== Example
+For an example of how to set up and test the token transformation filter, see
+Chapter 10, "Transforming OpenID Connect ID Tokens Into SAML Assertions" in the _Gateway Guide_.
+//TODO fix link Chapter 10, "Transforming OpenID Connect ID Tokens Into SAML Assertions
+
+The following example uses the REST STS instance `oidc-to-saml` to request transformation of an OpenID Connect ID
+token into a SAML 2.0 assertion. Both the subject authenticating to access the REST endpoint, and the REST STS
+instance are in the realm `/sts`. The subject credentials for authentication to OpenAM are provided in the attributes
+context at `sts.username` and `sts.password`. The ID token to transform is provided in the attributes context at
+`sts.id_token`. The resulting SAML 2.0 assertion is injected as a string in the attribute context at `sts.saml_assertions`:
+
+[source, json]
+----
+{
+    "type": "TokenTransformationFilter",
+    "config": {
+        "openamUri": "https://openam.example.com/openam/",
+        "realm": "/sts",
+        "username": "${attributes.sts.username}",
+        "password": "${attributes.sts.password}",
+        "idToken": "${attributes.sts.id_token}",
+        "target": "${attributes.sts.saml_assertions}",
+        "instance": "oidc-to-saml",
+        "amHandler": "ClientHandler"
+    }
+}
+----
+
+==== Javadoc
+org.forgerock.openig.openam.TokenTransformationFilter
+//TODO fix javadoc link
+
+=== UmaFilter
+Protect access as an UMA resource server
+
+==== Description
+This filter acts as a policy enforcement point, protecting access as a User-Managed Access (UMA) resource server.
+Specifically, this filter ensures that a request for protected resources includes a valid requesting party token with
+appropriate scopes before allowing the response to flow back to the requesting party.
+
+==== Usage
+[source, js]
+----
+{
+    "type": "UmaFilter",
+    "config": {
+        "protectionApiHandler": Handler reference,
+        "umaService": UmaService reference,
+        "realm": string
+    }
+}
+----
+
+==== Properties
+"protectionApiHandler": _Handler reference, required_::
+The handler to use when interacting with the UMA authorization server for token introspection and permission requests,
+such as a ClientHandler capable of making an HTTPS connection to the server.
++
+For details, see <<handlers-conf>>.
+
+"umaService": _UmaService reference, required_::
+The UmaService to use when protecting resources.
++
+For details, see <<UmaService>>.
+
+"realm": _string, optional_::
+The UMA realm set in the response to a request for a protected resource that does not include a requesting party
+token enabling access to the resource.
++
+Default: `uma`
+
+==== See Also
+
+https://docs.kantarainitiative.org/uma/rec-uma-core.html[User-Managed Access (UMA) Profile of OAuth 2.0]
+
+org.forgerock.openig.uma.UmaResourceServerFilter
+//TODO fix javadoc
+
+
+
+
+
+
+
+
 
 
 
