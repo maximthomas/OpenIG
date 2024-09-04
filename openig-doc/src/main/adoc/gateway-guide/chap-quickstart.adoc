@@ -25,7 +25,8 @@ In this chapter, you will learn to:
 * Prepare OpenIG so that you can follow all subsequent tutorials in the documentation
 
 This chapter allows you to quickly see how OpenIG works, and provides hands-on experience with a few key features.
-For more general installation and configuration instructions, start with <<chap-install>>.
+For more general installation and configuration instructions, start with
+xref:chap-install.adoc#chap-install[Installation in Detail].
 
 === Before You Begin
 Make sure you have a supported Java Development Kit installed.

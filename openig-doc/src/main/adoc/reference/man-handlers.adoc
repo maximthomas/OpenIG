@@ -1148,6 +1148,118 @@ org.forgerock.openig.handler.ScriptableHandler
 Process request through sequence of handlers
 
 
+==== Description
+Processes a request through a sequence of handlers. This allows multi-request processing such as retrieving a form,
+extracting form content (for example, nonce) and submitting in a subsequent request. Each `handler` in the bindings is
+dispatched to in order; the binding `postcondition` determines if the sequence should continue.
+
+==== Usage
+[source, javascript]
+----
+{
+    "name": string,
+    "type": "SequenceHandler",
+    "config": {
+        "bindings": [
+            {
+                "handler": Handler reference,
+                "postcondition": expression
+            }
+        ]
+    }
+}
+----
+
+==== Properties
+"bindings": _array of objects, required_::
+A list of bindings of handler and postcondition to determine that sequence continues.
+
+"handler": _Handler reference, required_::
+Dispatch to this handler.
++
+Either the name of the handler heap object to dispatch to, or an inline Handler configuration object.
++
+See also <<handlers-conf>>.
+
+"postcondition": _expression, optional_::
+Evaluated to determine if the sequence continues.
++
+Default: unconditional.
++
+See also <<Expressions>>.
+
+==== Javadoc
+org.forgerock.openig.handler.SequenceHandler
+//TODO fix javadoc
+
+=== StaticResponseHandler
+
+==== Description
+Creates a static response to a request.
+
+==== Usage
+[source, javascript]
+----
+{
+     "name": string,
+     "type": "StaticResponseHandler",
+     "config": {
+         "status": number,
+         "reason": string,
+         "version": string,
+         "headers": {
+             name: [ expression, ... ], ...
+         },
+         "entity": expression
+     }
+}
+----
+
+==== Properties
+
+"status": _number, required_::
+The response status code (for example, 200).
+
+"reason": _string, optional_::
+The response status reason (for example, `"OK"`).
+
+"version": _string, optional_::
+Protocol version. Default: `"HTTP/1.1"`.
+
+"headers": _array of objects, optional_::
+Header fields to set in the response. The `name` specifies the header name, with an associated array of expressions
+to evaluate as values.
+
+"entity": _expression, optional_::
+The message entity expression to be evaluated and included in the response.
++
+Conforms to the `Content-Type` header and sets `Content-Length`.
++
+See also <<Expressions>>.
+
+==== Example
+[source, json]
+----
+{
+     "name": "ErrorHandler",
+     "type":"StaticResponseHandler",
+     "config": {
+        "status": 500,
+        "reason": "Error",
+        "entity": "<html>
+                   <h2>Epic #FAIL</h2>
+                   </html>"
+     }
+}
+----
+
+==== Javadoc
+
+org.forgerock.openig.handler.StaticResponseHandler
+//TODO fix javadoc
+
+
+
 
 
 
