@@ -34,6 +34,7 @@ include::./man-handlers.adoc[]
 include::./man-filters.adoc[]
 include::./man-decorators.adoc[]
 include::./man-audit.adoc[]
+include::./man-misc.adoc[]
 
 
 
