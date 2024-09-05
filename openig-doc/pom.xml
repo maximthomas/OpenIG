@@ -388,6 +388,10 @@
                 <version>${project.version}</version>
                 <releaseVersion>5.2.4</releaseVersion>
               </attributes>
+              <requires>
+                <require>${project.basedir}/src/main/adoc/extensions/nested-open-block.rb</require>
+              </requires>
+              <doctype>book</doctype>
             </configuration>
             <executions>
               <execution>

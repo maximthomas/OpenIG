@@ -14,11 +14,7 @@
   Copyright 2024 3A Systems LLC.
 ////
 
-:doctype: book
 :imagesdir: ./images
-//:xrefstyle: full
-//:sectnums:
-:toc:
 :version-label: {releaseVersion}
 
 :figure-caption!:

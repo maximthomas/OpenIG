@@ -16,13 +16,12 @@
 ////
 
 = Configuration Reference
-
-include::../commons/settings.adoc[]
-
+:toc:
 :copyright: Copyright 2017 ForgeRock AS.
 :copyright: Portions Copyright 2024 3A Systems LLC.
 :authors: Paul Bryan, Mark Craig, Jamie Nelson, Joanne Henry
 
+include::../commons/settings.adoc[]
 
 [abstract]
 
@@ -34,5 +33,7 @@ include::./man-required-conf.adoc[]
 include::./man-handlers.adoc[]
 include::./man-filters.adoc[]
 include::./man-decorators.adoc[]
+include::./man-audit.adoc[]
+
 
 

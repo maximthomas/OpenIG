@@ -16,6 +16,7 @@
 ////
 
 = Gateway Guide
+:toc:
 :copyright: Copyright 2017 ForgeRock AS.
 :copyright: Portions Copyright 2024 3A Systems LLC.
 :authors: Paul Bryan, Mark Craig, Jamie Nelson, Guillaume Sauthier, Joanne Henry
@@ -24,7 +25,8 @@ include::../commons/settings.adoc[]
 
 [abstract]
 
-Instructions for installing and configuring OpenIG, a high-performance reverse proxy server with specialized session management and credential replay functionality.
+Instructions for installing and configuring OpenIG, a high-performance reverse proxy server with specialized session
+management and credential replay functionality.
 
 include::./preface.adoc[]
 include::./chap-start-here.adoc[]
