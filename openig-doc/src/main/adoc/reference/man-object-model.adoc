@@ -1,0 +1,187 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyright [year] [name of copyright owner]".
+
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+[#object-model-conf]
+== Requests, Responses, and Contexts
+This part of the reference describes the OpenIG object model. The top-level objects are request, response, and contexts.
+
+=== Attributes
+Context for arbitrary information
+
+==== Description
+Provides a map for arbitrary context information.
+
+This is one of the contexts described in <<Contexts>>.
+
+==== Properties
+"attributes": map::
+Map of arbitrary information where the keys are strings, and the values are objects.
+
+This is never `null`.
+
+==== Javadoc
+org.forgerock.services.context.AttributesContext
+//TODO fix javadoc
+
+=== Client
+HTTP client context information
+
+==== Description
+Provides information about the client sending the request.
+
+This is one of the contexts described in <<Contexts>>(5).
+
+==== Properties
+"certificates": array::
+List of X.509 certificates presented by the client
++
+If the client does not present any certificates, OpenIG returns an empty list.
++
+This is never `null`.
+
+"isExternal": boolean::
+True if the client connection is external.
+
+"isSecure": boolean::
+True if the client connection is secure.
+
+"localAddress": string::
+The IP address of the interface that received the request
+
+"localPort": number::
+The port of the interface that received the request
+
+"remoteAddress": string::
+The IP address of the client (or the last proxy) that sent the request
+
+"remotePort": number::
+The source port of the client (or the last proxy) that sent the request
+
+"remoteUser": string::
+The login of the user making the request, or `null` if unknown
++
+This is likely to be `null` unless you have deployed OpenIG with a non-default deployment descriptor that secures the
+OpenIG web application.
+
+"userAgent": string::
+The value of the User-Agent HTTP header in the request if any, otherwise `null`
+
+==== Javadoc
+org.forgerock.services.context.ClientContext
+//TODO fix javadoc
+
+=== Contexts
+HTTP request contexts
+
+==== Description
+The root object for request context information.
+
+Contexts is a map of available contexts, which implement the <<Context>>
+interface. The contexts map's keys are strings and the values are context objects. A context holds type-safe
+information useful for processing requests and responses. The `contexts` map is populated dynamically when creating
+bindings for evaluation of expressions and scripts.
+//TODO fix Context javadoc org/forgerock/services/context/Context.html
+
+All context objects have the following properties:
+
+"contextName": string::
+Name of the context.
+
+"id": string::
+Read-only string uniquely identifying the context object.
+
+"rootContext": boolean::
+True if the context object is a RootContext (has no parent).
+
+"parent": Context object::
+Parent of this context object.
+
+==== Properties
+The contexts object provides access to the following contexts:
+
+"attributes": AttributesContext object::
+Arbitrary state information.
++
+OpenIG can use this to inject arbitrary state information into the context.
++
+See also <<Attributes>>.
+
+"client": ClientContext object::
+Information about the client making the request.
++
+See also <<Client>>(5).
+
+"router": UriRouterContext object::
+Routing information associated with the request.
++
+See also <<UriRouterContext>>(5).
+
+"session": SessionContext object::
+Session context associated with the remote client.
++
+See also <<Session>>(5).
+
+==== Javadoc
+org.forgerock.services.context.Context
+//TODO fix javadoc
+
+=== Request
+HTTP request
+
+==== Description
+An HTTP request message.
+
+==== Properties
+"method": string::
+The method to be performed on the resource. Example: `"GET"`.
+
+"uri": object::
+The fully-qualified URI of the resource being accessed. Example: `"http://www.example.com/resource.txt"`.
++
+See also <<URI>>.
+
+"version": string::
+Protocol version. Example: `"HTTP/1.1"`.
+
+"headers": object::
+Exposes message header fields as name-value pairs, where name is header name and value is an array of header values.
+
+"cookies": object::
+Exposes incoming request cookies as name-value pairs, where name is cookie name and value is an array of string cookie values.
+
+"form": object::
+Exposes query parameters and/or `application/x-www-form-urlencoded` entity as name-value pairs, where name is the
+field name and value is an array of string values.
+
+"entity": object::
+The message entity body (no accessible properties).
+
+==== Javadoc
+org.forgerock.http.protocol.Request
+//TODO fix javadoc
+
+
+
+
+
+
+
+
+
+
+
+
