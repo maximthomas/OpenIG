@@ -174,6 +174,190 @@ The message entity body (no accessible properties).
 org.forgerock.http.protocol.Request
 //TODO fix javadoc
 
+=== Response
+HTTP response
+
+==== Description
+An HTTP response message.
+
+==== Properties
+"cause": Exception object::
+The cause of an error if the status code is in the range 4xx-5xx. Possibly `null`.
+
+"status": Status object::
+The response status.
++
+For details, see <<Status>>(5).
+
+"version": string::
+Protocol version. Example: `"HTTP/1.1"`.
+
+"headers": object::
+Exposes message header fields as name-value pairs, where name is header name and value is an array of header values.
+
+"entity": object::
+The message entity body (no accessible properties).
+
+==== Javadoc
+org.forgerock.http.protocol.Response
+//TODO fix javadoc
+
+=== Session
+HTTP session context
+
+==== Description
+Provides access to the HTTP session context.
+
+This is one of the contexts described in <<Contexts>>.
+
+==== Properties
+"session": map::
+Provides access to the HTTP session, which is a map. Session attributes are name-value pairs, where both keys and
+value are strings.
+
+==== Javadoc
+org.forgerock.http.session.SessionContext
+//TODO add javadoc
+
+=== Status
+HTTP response status
+
+==== Description
+Represents an HTTP response status. For details, see
+https://tools.ietf.org/html/rfc7231#section-6.1[RFC 7231: HTTP/1.1 Semantics and Content, Section 6.1. Overview of Status Codes].
+
+==== Properties
+"code": integer::
+Three-digit integer reflecting the HTTP status code.
+
+"family": enum::
+Family Enum value representing the class of response that corresponds to the code:
++
+--
+Family.INFORMATIONAL::
+Status code reflects a provisional, informational response: 1xx.
+
+Family.SUCCESSFUL::
+The server received, understood, accepted and processed the request successfully. Status code: 2xx.
+
+Family.REDIRECTION::
+Status code indicates that the client must take additional action to complete the request: 3xx.
+
+Family.CLIENT_ERROR::
+Status code reflects a client error: 4xx.
+
+Family.SERVER_ERROR::
+Status code indicates a server-side error: 5xx.
+
+Family.UNKNOWN::
+Status code does not belong to one of the known families: 600+.
+--
+
+"reasonPhrase": string::
+The human-readable reason-phrase corresponding to the status code.
++
+For details, see
+https://datatracker.ietf.org/doc/html/rfc7231#section-6.1[RFC 7231: HTTP/1.1 Semantics and Content, Section 6.1. Overview of Status Codes].
+
+"isClientError": boolean::
+True if Family.CLIENT_ERROR.
+
+"isInformational": boolean::
+True if Family.INFORMATIONAL.
+
+"isRedirection": boolean::
+True if Family.REDIRECTION.
+
+"isServerError": boolean::
+True if Family.SERVER_ERROR.
+
+"isSuccessful": boolean::
+True if Family.SUCCESSFUL.
+
+==== Javadoc
+org.forgerock.http.protocol.Status
+//TODO add javadoc
+
+=== URI
+Uniform Resource Identifier
+
+==== Description
+Represents a Uniform Resource Identifier (URI) reference.
+
+==== Properties
+
+"scheme": string::
+The scheme component of the URI, or `null` if the scheme is undefined.
+
+"authority": string::
+The decoded authority component of the URI, or `null` if the authority is undefined.
++
+Use "rawAuthority" to access the raw (encoded) component.
+
+"userInfo": string
+The decoded user-information component of the URI, or `null` if the user information is undefined.
++
+Use "rawUserInfo" to access the raw (encoded) component.
+
+"host": string::
+The host component of the URI, or `null` if the host is undefined.
+
+"port": number::
+The port component of the URI, or `null` if the port is undefined.
+
+"path": string::
+The decoded path component of the URI, or `null` if the path is undefined.
++
+Use "rawPath" to access the raw (encoded) component.
+
+"query": string::
+The decoded query component of the URI, or `null` if the query is undefined.
++
+Use "rawQuery" to access the raw (encoded) component.
+
+"fragment": string::
+The decoded fragment component of the URI, or `null` if the fragment is undefined.
++
+Use "rawFragment" to access the raw (encoded) component.
+
+==== Javadoc
+org.forgerock.http.MutableUri
+//TODO fix javadoc
+
+
+
+=== Router
+HTTP request routing context information
+
+==== Description
+Provides context information related to HTTP request routing.
+
+This is one of the contexts described in <<Contexts>>.
+
+==== Properties
+"matchedUri": string::
+The portion of the request URI that matched the URI template.
+
+"originalUri": URI::
+The original target URI for the request, as received by the web container.
++
+The value of this field is read-only.
+
+"remainingUri": string::
+The portion of the request URI that is remaining to be matched.
+
+"uriTemplateVariables": map::
+An unmodifiable Map where the keys and values are strings. The map contains the parsed URI template variables keyed
+on the URI template variable name.
+
+==== Javadoc
+org.forgerock.http.routing.UriRouterContex
+//TODO fix javadoc
+
+
+
+
+
 
 
 

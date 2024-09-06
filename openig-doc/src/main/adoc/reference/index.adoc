@@ -36,6 +36,8 @@ include::./man-decorators.adoc[]
 include::./man-audit.adoc[]
 include::./man-misc.adoc[]
 include::./man-expressions.adoc[]
+include::./man-object-model.adoc[]
+
 
 
 
